@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TiDB SQL Tunner</title>
+    <!-- Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        /* Add blue border to the left and right columns */
+        .row-eq-height {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .left-column,
+        .right-column {
+            border: 2px solid #FFF;
+            /* Blue border color */
+            padding: 10px;
+            /* Add some padding for visual appeal */
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="row row-eq-height">
+            <div class="col-md-6 left-column">
+                <h1>Input</h1>
+                <form id="uploadForm" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="planReplayerInput" class="form-label">Plan Replayer</label>
+                        <input type="file" class="form-control" id="planReplayerInput" name="file">
+                    </div>
+                    <div class="mb-3">
+                        <label for="originalSQLInput" class="form-label">Original SQL</label>
+                        <textarea class="form-control" id="originalSQLInput" name="original_sql" rows="8"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="schemasInput" class="form-label">Schemas</label>
+                        <textarea class="form-control" id="schemasInput" name="schemas" rows="6"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="statisticsInfoInput" class="form-label">Statistics Info</label>
+                        <textarea class="form-control" id="statisticsInfoInput" name="stats_info" rows="6"></textarea>
+                    </div>
+
+                    <!-- Center the "Tune" button -->
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn btn-primary me-2" id="tuneButton">Tune</button>
+                        <button type="button" class="btn btn-secondary" id="clearButton">Clear</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6 right-column">
+                <h1>Output</h1>
+                <div class="mb-3">
+                    <label for="tunedSQLOutput" class="form-label">Tuned SQL</label>
+                    <textarea class="form-control" id="tunedSQLOutput" rows="12" readonly></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="whatChangedOutput" class="form-label">What Changed and Why</label>
+                    <textarea class="form-control" id="whatChangedOutput" rows="6" readonly></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="moreIndexSuggestionsOutput" class="form-label">More Index Suggestions</label>
+                    <textarea class="form-control" id="moreIndexSuggestionsOutput" rows="6" readonly></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap JS links -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <!-- CodeMirror JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
+    <!-- CodeMirror SQL mode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/sql/sql.min.js"></script>
+
+
+    <script>
+        $(document).ready(function () {
+            // Handle file selection event
+            $('#planReplayerInput').change(function () {
+                $('#uploadForm')[0].reset();
+                $('#tunedSQLOutput, #whatChangedOutput, #moreIndexSuggestionsOutput').val('');
+                
+                var form = $('#uploadForm')[0];
+                var formData = new FormData(form);
+
+                $.ajax({
+                    url: '/parse',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        // Update the input fields with the parsed data
+                        $('#originalSQLInput').val(data.original_sql);
+                        $('#schemasInput').val(data.schemas);
+                        $('#statisticsInfoInput').val(data.stats_info);
+                    },
+                    error: function () {
+                        alert('An error occurred during parsing.');
+                    }
+                });
+            });
+
+            // Handle form submission on button click
+            $('#tuneButton').click(function () {
+                $(this).prop('disabled', true).text('Tuning...');
+                $('#tunedSQLOutput, #whatChangedOutput, #moreIndexSuggestionsOutput').val('');
+
+                var form = $('#uploadForm')[0];
+                var formData = new FormData(form);
+
+                $.ajax({
+                    url: '/tune',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        if (data.error) {
+                            alert(data.error);
+                            return;
+                        }
+                        $('#tunedSQLOutput').val(data.tuned_sql);
+                        $('#whatChangedOutput').val(data.what_changed);
+                        $('#moreIndexSuggestionsOutput').val(data.index_suggestion);
+                    },
+                    error: function () {
+                        alert('An error occurred during processing.');
+                    },
+                    complete: function () {
+                        // Re-enable the "Tune" button and revert its text to "Tune"
+                        $('#tuneButton').prop('disabled', false).text('Tune');
+                    }
+                });
+            });
+
+            $('#clearButton').click(function () {
+                // Clear all input and output fields
+                $('#uploadForm')[0].reset();
+                $('#tunedSQLOutput, #whatChangedOutput, #moreIndexSuggestionsOutput').val('');
+            });
+
+            function updateLabelTitle(inputElement, maxLength) {
+                var inputLength = inputElement.val().trim().length;
+                var label = $('label[for="' + inputElement.attr('id') + '"]');
+
+                if (inputLength > maxLength) {
+                    label.text(label.text() + ' - Too long');
+                } else {
+                    label.text(label.text().replace(' - Too long', ''));
+                }
+            }
+
+            // Bind event listeners to "Schemas" and "Statistics Info" inputs for both "input" and "change" events
+            $('#schemasInput, #statisticsInfoInput').on('input change', function () {
+                updateLabelTitle($(this), 4000);
+            });
+        });
+    </script>
+</body>
+
+</html>
