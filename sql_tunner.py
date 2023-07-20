@@ -7,7 +7,7 @@ from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 class SqlTunner:
     def __init__(self):
         self.init_dotenv()
-        self.chat = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k")
+        self.chat = ChatOpenAI(temperature=0, model="gpt-4")
         self.init_output_parser()
         self.init_prompt()
 

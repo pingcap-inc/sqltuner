@@ -89,7 +89,7 @@
             $('#planReplayerInput').change(function () {
                 $('#originalSQLInput, #schemasInput, #statisticsInfoInput').val('');
                 $('#tunedSQLOutput, #whatChangedOutput, #moreIndexSuggestionsOutput').val('');
-                
+
                 var form = $('#uploadForm')[0];
                 var formData = new FormData(form);
 
@@ -150,12 +150,14 @@
                 $('#tunedSQLOutput, #whatChangedOutput, #moreIndexSuggestionsOutput').val('');
             });
 
-            function updateLabelTitle(inputElement, maxLength) {
+            function updateLabelTitle(inputElement) {
                 var inputLength = inputElement.val().trim().length;
                 var label = $('label[for="' + inputElement.attr('id') + '"]');
 
-                if (inputLength > maxLength) {
-                    label.text(label.text() + ' - Too long');
+                if (inputLength > 4000) {
+                    if (label.text().indexOf(' - Too long') === -1) {
+                        label.text(label.text() + ' - Too long');
+                    }
                 } else {
                     label.text(label.text().replace(' - Too long', ''));
                 }
@@ -163,7 +165,7 @@
 
             // Bind event listeners to "Schemas" and "Statistics Info" inputs for both "input" and "change" events
             $('#schemasInput, #statisticsInfoInput').on('input change', function () {
-                updateLabelTitle($(this), 4000);
+                updateLabelTitle($(this));
             });
         });
     </script>
