@@ -7,7 +7,6 @@ from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 class SqlTunner:
     def __init__(self):
         self.init_dotenv()
-        self.chat = ChatOpenAI(temperature=0, model="gpt-4")
         self.init_output_parser()
         self.init_prompt()
 
@@ -41,11 +40,12 @@ class SqlTunner:
             partial_variables = {"format_instructions": self.output_parser.get_format_instructions()},
         )
 
-    def tune(self, original_sql, schemas, stats_info):
+    def tune(self, gpt_version, original_sql, schemas, stats_info):
         input = self.prompt.format_prompt(original_sql=original_sql, schemas=schemas, stats_info=stats_info)
         print(input.to_messages())
         try:
-            output = self.chat(input.to_messages())
+            chat = ChatOpenAI(temperature=0, model=gpt_version)
+            output = chat(input.to_messages())
             print(output.content)
             return self.output_parser.parse(output.content)
         except Exception as e:

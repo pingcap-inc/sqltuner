@@ -21,9 +21,10 @@ def tune():
     stats_info = request.form['stats_info']
     new_schemas = None if len(schemas) > 4000 else schemas
     new_stats_info = None if len(stats_info) > 4000 else stats_info
+    gpt_version = request.form['gpt_version']
 
     try:
-        result = tunner.tune(original_sql, new_schemas, new_stats_info)
+        result = tunner.tune(gpt_version, original_sql, new_schemas, new_stats_info)
 
         db = store.Store()
         db.insert_record(original_sql, schemas, stats_info, result['tuned_sql'], result['what_changed'], result['index_suggestion'])

@@ -94,6 +94,11 @@
         </div>
     </div>
 
+    <div class="btn-group position-fixed top-0 end-0 mt-3 me-3" role="group" aria-label="GPT Version">
+        <button type="button" class="btn btn-primary active" id="gpt35">gpt-3.5-turbo</button>
+        <button type="button" class="btn btn-secondary" id="gpt40">gpt-4</button>
+    </div>
+
     <!-- jQuery and Bootstrap JS links -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -106,6 +111,8 @@
 
     <script>
         $(document).ready(function () {
+            gptVersion = "gpt-3.5-turbo";
+
             // Handle file selection event
             $('#planReplayerInput').change(function () {
                 $('#originalSQLInput, #schemasInput, #statisticsInfoInput').val('');
@@ -139,6 +146,8 @@
 
                 var form = $('#uploadForm')[0];
                 var formData = new FormData(form);
+                formData.append('gpt_version', gptVersion);
+                formData.delete('file');
 
                 $.ajax({
                     url: '/tune',
@@ -187,6 +196,21 @@
             // Bind event listeners to "Schemas" and "Statistics Info" inputs for both "input" and "change" events
             $('#schemasInput, #statisticsInfoInput').on('input change', function () {
                 updateLabelTitle($(this));
+            });
+
+            $('.btn').click(function() {
+                // Remove the 'active' class from all buttons
+                $('.btn').removeClass('active');
+                $('.btn').removeClass('btn-primary');
+                $('.btn').addClass('btn-secondary');
+
+                // Add the 'active' class to the clicked button
+                $(this).addClass('active');
+                $(this).addClass('btn-primary');
+                $(this).removeClass('btn-secondary');
+
+                // Get the selected option (3.5 or 4.0)
+                gptVersion = $(this).text();
             });
         });
     </script>
