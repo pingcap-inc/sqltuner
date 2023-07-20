@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>History Page</title>
+    <!-- Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css">
+</head>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">TiDB SQL Tuner</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Tune</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/history/1">History</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+            <h3>ID: {{record[0]}}</h3>
+            <div class="d-flex">
+                <button id="previousButton" type="button" class="btn btn-primary me-2">Previous</button>
+                <button id="nextButton" type="button" class="btn btn-primary me-2">Next</button>
+                <div class="input-group">
+                    <input id="recordNumberInput" type="number" class="form-control" placeholder="Go to" min="1">
+                    <button id="goButton" class="btn btn-primary" type="button">Go</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Left Column: Display Original SQL using CodeMirror -->
+            <div class="col-md-6">
+                <h3>Original SQL</h3>
+                <textarea id="originalSqlOutput" class="form-control" rows="10" readonly>{{ record[1] }}</textarea>
+            </div>
+            <!-- Right Column: Display Tuned SQL using CodeMirror -->
+            <div class="col-md-6">
+                <h3>Tuned SQL</h3>
+                <textarea id="tunedSqlOutput" class="form-control" rows="10" readonly>{{ record[4] }}</textarea>
+            </div>
+        </div>
+
+        <!-- Row for Index Suggestions -->
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <h3>Index Suggestions</h3>
+                <p>{{ record[6] }}</p>
+            </div>
+        </div>
+
+        <!-- Row for What Changed -->
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <h3>What Changed</h3>
+                <p>{{ record[5] }}</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- jQuery and Bootstrap JS links -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- CodeMirror JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
+    <!-- CodeMirror SQL mode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/sql/sql.min.js"></script>
+    <script>
+        // Initialize CodeMirror for the "Original SQL" and "Tuned SQL" textareas
+        var originalSqlOutput = document.getElementById("originalSqlOutput");
+        var originalSqlCodeMirror = CodeMirror.fromTextArea(originalSqlOutput, {
+            mode: "text/x-sql",
+            theme: "default",
+            readOnly: true
+        });
+
+        var tunedSqlOutput = document.getElementById("tunedSqlOutput");
+        var tunedSqlCodeMirror = CodeMirror.fromTextArea(tunedSqlOutput, {
+            mode: "text/x-sql",
+            theme: "default",
+            readOnly: true
+        });
+
+               // Get the current record number from the URL
+        function getCurrentRecordNumber() {
+            const currentUrl = new URL(window.location.href);
+            return parseInt(currentUrl.pathname.split('/').pop());
+        }
+
+        // Update the URL with the new record number
+        function updateRecordNumber(recordNumber) {
+            window.location = `/history/${recordNumber}`;
+        }
+
+        // Handle "Previous" button click
+        $('#previousButton').click(function() {
+            let currentRecord = getCurrentRecordNumber();
+            if (currentRecord > 1) {
+                updateRecordNumber(currentRecord - 1);
+            }
+        });
+
+        // Handle "Next" button click
+        $('#nextButton').click(function() {
+            let currentRecord = getCurrentRecordNumber();
+            updateRecordNumber(currentRecord + 1);
+        });
+
+        // Handle "Go" button click
+        $('#goButton').click(function() {
+            let inputValue = parseInt($('#recordNumberInput').val());
+            if (!isNaN(inputValue) && inputValue > 0) {
+                updateRecordNumber(inputValue);
+            }
+        });
+        
+    </script>
+</body>
+</html>
