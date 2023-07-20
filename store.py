@@ -66,11 +66,38 @@ class Store:
     def get_count(self):
         try:
             with self.connection.cursor() as cursor:
-                sql = "SELECT COUNT(*) FROM your_table_name"
+                sql = "SELECT COUNT(*) FROM history"
                 cursor.execute(sql)
                 return cursor.fetchone()[0]
         except pymysql.Error as e:
             print(f"Error getting table count: {e}")
+
+    def get_first(self):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT min(id) FROM history"
+                cursor.execute(sql)
+                return cursor.fetchone()[0]
+        except pymysql.Error as e:
+            print(f"Error getting first id: {e}")
+
+    def get_next(self, id):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT id FROM history WHERE id > %s order by id limit 1"
+                cursor.execute(sql, id)
+                return cursor.fetchone()[0]
+        except pymysql.Error as e:
+            print(f"Error getting next id: {e}")
+
+    def get_prev(self, id):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT id FROM history WHERE id < %s order by id desc limit 1"
+                cursor.execute(sql, id)
+                return cursor.fetchone()[0]
+        except pymysql.Error as e:
+            print(f"Error getting previous id: {e}")
     
     def close(self):
         self.connection.close()

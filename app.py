@@ -5,6 +5,7 @@ import uuid
 from werkzeug.utils import secure_filename
 import shutil
 import sql_tunner
+import store
 
 app = Flask(__name__)
 tunner = sql_tunner.SqlTunner()
@@ -17,14 +18,16 @@ def index():
 def tune():
     original_sql = request.form['original_sql']
     schemas = request.form['schemas']
-    if len(schemas) > 4000:
-        schemas = None
     stats_info = request.form['stats_info']
-    if len(stats_info) > 4000:
-        stats_info = None
+    new_schemas = None if len(schemas) > 4000 else schemas
+    new_stats_info = None if len(stats_info) > 4000 else stats_info
 
     try:
-        result = tunner.tune(original_sql, schemas, stats_info)
+        result = tunner.tune(original_sql, new_schemas, new_stats_info)
+
+        db = store.Store()
+        db.insert_record(original_sql, schemas, stats_info, result['tuned_sql'], result['what_changed'], result['index_suggestion'])
+        db.close()
 
         return jsonify({
             'tuned_sql': result['tuned_sql'],
@@ -58,6 +61,38 @@ def parse():
         'schemas': schemas,
         'stats_info': stats_info,
     })
+
+@app.route('/history', methods=['GET'])
+def first():
+    db = store.Store()
+    id = db.get_first()
+    db.close()
+
+    return redirect(url_for('history', id=id))
+
+@app.route('/history/next/<int:id>', methods=['GET'])
+def next(id):
+    db = store.Store()
+    id = db.get_next(id)
+    db.close()
+
+    return redirect(url_for('history', id=id))
+
+@app.route('/history/prev/<int:id>', methods=['GET'])
+def prev(id):
+    db = store.Store()
+    id = db.get_prev(id)
+    db.close()
+
+    return redirect(url_for('history', id=id))
+
+@app.route('/history/<int:id>', methods=['GET'])
+def history(id):
+    db = store.Store()
+    record = db.get_record_by_id(id)
+    db.close()
+
+    return render_template('history.html', record=record)
 
 
 def process_zip(zip_file_path):
@@ -101,4 +136,4 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() == 'zip'
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host = '0.0.0.0', port=5001)
