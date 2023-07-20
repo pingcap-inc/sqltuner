@@ -39,6 +39,10 @@ def tune():
 @app.route('/parse', methods=['POST'])
 def parse():
     file = request.files['file']
+    if file.filename == '':
+        return jsonify({
+            'error': 'No selected file',
+        })
     filename = secure_filename(file.filename)
     unique_filename = str(uuid.uuid4()) + '-' + filename
 

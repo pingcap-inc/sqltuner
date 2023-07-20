@@ -87,7 +87,7 @@
         $(document).ready(function () {
             // Handle file selection event
             $('#planReplayerInput').change(function () {
-                $('#uploadForm')[0].reset();
+                $('#originalSQLInput, #schemasInput, #statisticsInfoInput').val('');
                 $('#tunedSQLOutput, #whatChangedOutput, #moreIndexSuggestionsOutput').val('');
                 
                 var form = $('#uploadForm')[0];
