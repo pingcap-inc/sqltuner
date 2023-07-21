@@ -77,7 +77,8 @@ class Store:
             with self.connection.cursor() as cursor:
                 sql = "SELECT min(id) FROM history"
                 cursor.execute(sql)
-                return cursor.fetchone()[0]
+                result = cursor.fetchone()
+                return result[0] if result else None
         except pymysql.Error as e:
             print(f"Error getting first id: {e}")
 
@@ -86,7 +87,8 @@ class Store:
             with self.connection.cursor() as cursor:
                 sql = "SELECT id FROM history WHERE id > %s order by id limit 1"
                 cursor.execute(sql, id)
-                return cursor.fetchone()[0]
+                result = cursor.fetchone()
+                return result[0] if result else None
         except pymysql.Error as e:
             print(f"Error getting next id: {e}")
 
@@ -95,7 +97,8 @@ class Store:
             with self.connection.cursor() as cursor:
                 sql = "SELECT id FROM history WHERE id < %s order by id desc limit 1"
                 cursor.execute(sql, id)
-                return cursor.fetchone()[0]
+                result = cursor.fetchone()
+                return result[0] if result else None
         except pymysql.Error as e:
             print(f"Error getting previous id: {e}")
     

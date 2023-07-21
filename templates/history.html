@@ -46,6 +46,14 @@
         </div>
     </nav>
 
+    <!-- Error Message Box -->
+    <div class="container mt-3" id="errorBox" style="display: none;">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error:</strong> <span id="errorMessage"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
     <div class="container mt-5">
         <div class="row">
             <!-- Left Column: Display Original SQL using CodeMirror -->
@@ -101,39 +109,62 @@
             readOnly: true
         });
 
-               // Get the current record number from the URL
+        // Get the current record number from the URL
         function getCurrentRecordNumber() {
             const currentUrl = new URL(window.location.href);
             return parseInt(currentUrl.pathname.split('/').pop());
         }
 
+        function showError(message) {
+                $('#errorMessage').text(message);
+                $('#errorBox').fadeIn();
+            }
+
+        // Function to hide the error message
+        function hideError() {
+            $('#errorBox').fadeOut();
+        }
+
         // Update the URL with the new record number
-        function updateRecordNumber(recordNumber) {
-            window.location = `/history/${recordNumber}`;
+        function navigate(url, errorMessage) {
+            $.ajax({
+                url: url,
+                type: 'get',
+                success: function (response) {
+                    if (response) {
+                        window.location = `/history/${response.id}`;
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (jqXHR.status === 404) {
+                        showError(errorMessage);
+                    } else {
+                        // Handle other error codes here
+                        showError('An error occurred');
+                    }
+                }
+            });
         }
 
         // Handle "Previous" button click
-        $('#previousButton').click(function() {
+        $('#previousButton').click(function () {
             let currentRecord = getCurrentRecordNumber();
-            if (currentRecord > 1) {
-                window.location = `/history/prev/${currentRecord}`;
-            }
+            navigate(`/history/prev/${currentRecord}`, 'No more records');
         });
 
         // Handle "Next" button click
-        $('#nextButton').click(function() {
+        $('#nextButton').click(function () {
             let currentRecord = getCurrentRecordNumber();
-            window.location = `/history/next/${currentRecord}`;
+            navigate(`/history/next/${currentRecord}`, 'No more records');
         });
 
         // Handle "Go" button click
-        $('#goButton').click(function() {
+        $('#goButton').click(function () {
             let inputValue = parseInt($('#recordNumberInput').val());
-            if (!isNaN(inputValue) && inputValue > 0) {
-                updateRecordNumber(inputValue);
-            }
+            navigate(`/history/${inputValue}`, 'Record not found');
         });
-        
+
     </script>
 </body>
+
 </html>

@@ -1,4 +1,4 @@
-from flask import Flask, request,render_template, redirect, url_for,jsonify
+from flask import Flask, request,render_template, redirect, url_for,jsonify, abort
 import os
 import zipfile
 import uuid
@@ -77,7 +77,12 @@ def next(id):
     id = db.get_next(id)
     db.close()
 
-    return redirect(url_for('history', id=id))
+    if id:
+        return jsonify({
+            'id': id,
+        })
+    else:
+        abort(404)
 
 @app.route('/history/prev/<int:id>', methods=['GET'])
 def prev(id):
@@ -85,13 +90,21 @@ def prev(id):
     id = db.get_prev(id)
     db.close()
 
-    return redirect(url_for('history', id=id))
+    if id:
+        return jsonify({
+            'id': id,
+        })
+    else:
+        abort(404)
 
 @app.route('/history/<int:id>', methods=['GET'])
 def history(id):
     db = store.Store()
     record = db.get_record_by_id(id)
     db.close()
+
+    if not record:
+        abort(404)
 
     return render_template('history.html', record=record)
 
