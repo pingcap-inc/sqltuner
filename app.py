@@ -70,6 +70,7 @@ def parse():
 @app.route('/history/first', methods=['GET'])
 def first():
     id = db.get_first()
+    print("first" ,id)
 
     return redirect(url_for('history', id=id))
 
