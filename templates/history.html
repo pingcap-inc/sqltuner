@@ -183,7 +183,7 @@
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     if (jqXHR.status === 404) {
-                        showError(errorMessage);
+                        showError('Record not found');
                     } else {
                         // Handle other error codes here
                         showError('An error occurred');
