@@ -7,5 +7,7 @@ create table history (
     what_changed text,
     index_suggestion text,
     correct tinyint,
+    gpt_version varchar(20),
+    created_at timestamp not null default current_timestamp,
     primary key (id)
     );

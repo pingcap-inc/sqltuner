@@ -47,6 +47,15 @@
         </div>
     </nav>
 
+
+    <!-- Error Message Box -->
+    <div class="container mt-3" id="errorBox" style="display: none;">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error:</strong> <span id="errorMessage"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
     <div class="container mt-1">
         <div class="row row-eq-height">
             <div class="col-md-6 left-column">
@@ -94,7 +103,7 @@
         </div>
     </div>
 
-    <div class="btn-group position-fixed top-0 end-0 mt-3 me-3" role="group" aria-label="GPT Version">
+    <div id="versionToggle" class="btn-group position-fixed top-0 end-0 mt-3 me-3" role="group" aria-label="GPT Version">
         <button type="button" class="btn btn-primary active" id="gpt35">gpt-3.5-turbo</button>
         <button type="button" class="btn btn-secondary" id="gpt40">gpt-4</button>
     </div>
@@ -134,7 +143,7 @@
                         $('#statisticsInfoInput').val(data.stats_info);
                     },
                     error: function () {
-                        alert('An error occurred during parsing.');
+                        show('An error occurred during parsing.');
                     }
                 });
             });
@@ -165,7 +174,7 @@
                         $('#moreIndexSuggestionsOutput').val(data.index_suggestion);
                     },
                     error: function () {
-                        alert('An error occurred during processing.');
+                        showError('An error occurred during processing.');
                     },
                     complete: function () {
                         // Re-enable the "Tune" button and revert its text to "Tune"
@@ -198,11 +207,11 @@
                 updateLabelTitle($(this));
             });
 
-            $('.btn').click(function() {
+            $('#versionToggle >.btn').click(function () {
                 // Remove the 'active' class from all buttons
-                $('.btn').removeClass('active');
-                $('.btn').removeClass('btn-primary');
-                $('.btn').addClass('btn-secondary');
+                $('#versionToggle > .btn').removeClass('active');
+                $('#versionToggle > .btn').removeClass('btn-primary');
+                $('#versionToggle > .btn').addClass('btn-secondary');
 
                 // Add the 'active' class to the clicked button
                 $(this).addClass('active');
@@ -212,6 +221,16 @@
                 // Get the selected option (3.5 or 4.0)
                 gptVersion = $(this).text();
             });
+
+            function showError(message) {
+                $('#errorMessage').text(message);
+                $('#errorBox').fadeIn();
+            }
+
+            // Function to hide the error message
+            function hideError() {
+                $('#errorBox').fadeOut();
+            }
         });
     </script>
 </body>

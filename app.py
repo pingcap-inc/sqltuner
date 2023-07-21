@@ -29,7 +29,7 @@ def tune():
     try:
         result = tunner.tune(gpt_version, original_sql, new_schemas, new_stats_info)
 
-        db.insert_record(original_sql, schemas, stats_info, result['tuned_sql'], result['what_changed'], result['index_suggestion'])
+        db.insert_record(original_sql, schemas, stats_info, result['tuned_sql'], result['what_changed'], result['index_suggestion'], gpt_version)
 
         return jsonify({
             'tuned_sql': result['tuned_sql'],

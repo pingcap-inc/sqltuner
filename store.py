@@ -33,12 +33,15 @@ class Store:
 
 
     # Function to insert a new record into the table
-    def insert_record(self,original_sql, schemas, stats_info, tuned_sql, what_changed, index_suggestion):
+    def insert_record(self,original_sql, schemas, stats_info, tuned_sql, what_changed, index_suggestion,gpt_version):
+        stats_info = stats_info[:10000] if len(stats_info) > 10000 else stats_info
+        schemas = schemas[:10000] if len(schemas) > 10000 else schemas
+        
         try:
             with self.connection.cursor() as cursor:
-                sql = "INSERT INTO history (original_sql, schemas_info, stats_info, tuned_sql, what_changed, index_suggestion) " \
-                    "VALUES (%s, %s, %s, %s, %s, %s)"
-                cursor.execute(sql, (original_sql, schemas, stats_info, tuned_sql, what_changed, index_suggestion))
+                sql = "INSERT INTO history (original_sql, schemas_info, stats_info, tuned_sql, what_changed, index_suggestion,gpt_version) " \
+                    "VALUES (%s, %s, %s, %s, %s, %s,%s)"
+                cursor.execute(sql, (original_sql, schemas, stats_info, tuned_sql, what_changed, index_suggestion,gpt_version))
             self.connection.commit()
         except pymysql.Error as e:
             print(f"Error inserting record: {e}")
@@ -110,7 +113,7 @@ if __name__ == "__main__":
     store = Store()
     
     # Example usage:
-    store.insert_record("orginal_history", "schema_info", "stats_info", "tuned_sql", "changes", "index_suggestion")
+    store.insert_record("orginal_history", "schema_info", "stats_info", "tuned_sql", "changes", "index_suggestion", "gpt_version")
     store.update_correct_field(1, 1)
 
     record = store.get_record_by_id(1)
