@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
     <!-- CodeMirror CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css">
+     <!-- SQL Formatter JS -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql-formatter/2.3.3/sql-formatter.min.js"></script>
 </head>
 </head>
 
@@ -25,7 +27,7 @@
                         <a class="nav-link" href="/">Tune</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/history">History</a>
+                        <a class="nav-link" href="/history/first">History</a>
                     </li>
                 </ul>
             </div>
@@ -100,15 +102,24 @@
         var originalSqlCodeMirror = CodeMirror.fromTextArea(originalSqlOutput, {
             mode: "text/x-sql",
             theme: "default",
-            readOnly: true
+            readOnly: true,
         });
 
         var tunedSqlOutput = document.getElementById("tunedSqlOutput");
         var tunedSqlCodeMirror = CodeMirror.fromTextArea(tunedSqlOutput, {
             mode: "text/x-sql",
             theme: "default",
-            readOnly: true
+            readOnly: true,
         });
+
+        function formatSQL(codeMirror) {
+            var sqlCode = codeMirror.getValue();
+            var formattedCode = sqlFormatter.format(sqlCode, { language: 'sql' });
+            codeMirror.setValue(formattedCode);
+        }
+
+        formatSQL(originalSqlCodeMirror);
+        formatSQL(tunedSqlCodeMirror);
 
         // Get the current record number from the URL
         function getCurrentRecordNumber() {

@@ -64,7 +64,7 @@ def parse():
         'stats_info': stats_info,
     })
 
-@app.route('/history', methods=['GET'])
+@app.route('/history/first', methods=['GET'])
 def first():
     id = db.get_first()
 
