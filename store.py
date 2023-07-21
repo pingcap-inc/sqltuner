@@ -103,6 +103,7 @@ class Store:
             print(f"Error getting previous id: {e}")
     
     def close(self):
+        print("Closing connection to TiDB...")
         self.connection.close()
 
 if __name__ == "__main__":

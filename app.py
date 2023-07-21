@@ -6,9 +6,12 @@ from werkzeug.utils import secure_filename
 import shutil
 import sql_tunner
 import store
+import atexit
 
 app = Flask(__name__)
 tunner = sql_tunner.SqlTunner()
+db = store.Store()
+atexit.register(db.close)
 
 @app.route('/', methods=['GET'])
 def index():
@@ -26,9 +29,7 @@ def tune():
     try:
         result = tunner.tune(gpt_version, original_sql, new_schemas, new_stats_info)
 
-        db = store.Store()
         db.insert_record(original_sql, schemas, stats_info, result['tuned_sql'], result['what_changed'], result['index_suggestion'])
-        db.close()
 
         return jsonify({
             'tuned_sql': result['tuned_sql'],
@@ -65,17 +66,13 @@ def parse():
 
 @app.route('/history', methods=['GET'])
 def first():
-    db = store.Store()
     id = db.get_first()
-    db.close()
 
     return redirect(url_for('history', id=id))
 
 @app.route('/history/next/<int:id>', methods=['GET'])
 def next(id):
-    db = store.Store()
     id = db.get_next(id)
-    db.close()
 
     if id:
         return jsonify({
@@ -86,9 +83,7 @@ def next(id):
 
 @app.route('/history/prev/<int:id>', methods=['GET'])
 def prev(id):
-    db = store.Store()
     id = db.get_prev(id)
-    db.close()
 
     if id:
         return jsonify({
@@ -99,9 +94,7 @@ def prev(id):
 
 @app.route('/history/<int:id>', methods=['GET'])
 def history(id):
-    db = store.Store()
     record = db.get_record_by_id(id)
-    db.close()
 
     if not record:
         abort(404)
