@@ -22,13 +22,18 @@
             display: flex;
             flex-direction: column;
         }
+
+        .container-fluid {
+            padding-left: 30px;
+            padding-right: 30px;
+        }
     </style>
 </head>
 
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
+        <div class="container-fluid mt-3">
             <a class="navbar-brand" href="/">TiDB SQL Tuner</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,10 +61,17 @@
         </div>
     </div>
 
+    <!--  Message Box -->
+    <div class="container mt-3" id="successBox" style="display: none;">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Success:</strong> <span id="successMessage"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
     <div class="container-fluid mt-1">
         <div class="row row-eq-height">
             <div class="col-md-6 left-column">
-                <h1>Input</h1>
                 <form id="uploadForm" method="post" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="planReplayerInput" class="form-label">Plan Replayer</label>
@@ -86,10 +98,9 @@
                 </form>
             </div>
             <div class="col-md-6 right-column">
-                <h1>Output</h1>
                 <div class="mb-3">
                     <label for="tunedSQLOutput" class="form-label">Tuned SQL</label>
-                    <textarea class="form-control" id="tunedSQLOutput" rows="12" readonly></textarea>
+                    <textarea class="form-control" id="tunedSQLOutput" rows="11" readonly></textarea>
                 </div>
                 <div class="mb-3">
                     <label for="whatChangedOutput" class="form-label">What Changed and Why</label>
@@ -99,12 +110,20 @@
                     <label for="moreIndexSuggestionsOutput" class="form-label">More Index Suggestions</label>
                     <textarea class="form-control" id="moreIndexSuggestionsOutput" rows="6" readonly></textarea>
                 </div>
+
+                <!-- New buttons: Correct and UnCorrect -->
+                <div class="d-flex justify-content-center">
+                    <button type="button" class="btn btn-success me-2" disabled id="correctButton">Correct</button>
+                    <button type="button" class="btn btn-danger" id="uncorrectButton" disabled>UnCorrect</button>
+                </div>
+              
             </div>
         </div>
     </div>
 
-    <div id="versionToggle" class="btn-group position-fixed top-0 end-0 mt-3 me-3" role="group" aria-label="GPT Version">
-        <button type="button" class="btn btn-primary active" id="gpt35">gpt-3.5-turbo</button>
+    <div id="versionToggle" class="btn-group position-fixed top-0 end-0 mt-3 me-3" role="group"
+        aria-label="GPT Version">
+        <button type="button" class="btn btn-primary active" id="gpt35">gpt-3.5-turbo-16k</button>
         <button type="button" class="btn btn-secondary" id="gpt40">gpt-4</button>
     </div>
 
@@ -121,6 +140,7 @@
     <script>
         $(document).ready(function () {
             gptVersion = "gpt-3.5-turbo";
+            id = 0;
 
             // Handle file selection event
             $('#planReplayerInput').change(function () {
@@ -172,6 +192,11 @@
                         $('#tunedSQLOutput').val(data.tuned_sql);
                         $('#whatChangedOutput').val(data.what_changed);
                         $('#moreIndexSuggestionsOutput').val(data.index_suggestion);
+                        id = data.id;
+
+                        $('#correctButton').prop('disabled', false);
+                        $('#uncorrectButton').prop('disabled', false);
+
                     },
                     error: function () {
                         showError('An error occurred during processing.');
@@ -227,10 +252,52 @@
                 $('#errorBox').fadeIn();
             }
 
+            function showSuccess(message) {
+                $('#successMessage').text(message);
+                $('#successBox').fadeIn();
+            }
+
+
             // Function to hide the error message
             function hideError() {
                 $('#errorBox').fadeOut();
             }
+
+            function updateCorrect(correct) {
+                $.ajax({
+                    url: '/correct',
+                    type: 'POST',
+                    data: {
+                        'id': id,
+                        'correct': correct
+                    },
+                    success: function(){
+                        $('#correctButton').prop('disabled', true);
+                        $('#uncorrectButton').prop('disabled', true);
+                        showSuccess('Tune status updated successfully.');
+                        if(correct > 0){
+
+                        }
+                    },
+                    error: function(){
+                        showError('An error occurred during updating tune status.');
+                    }
+                }, 
+                function (data) {
+                    if (data.error) {
+                        showError(data.error);
+                        return;
+                    }
+                });
+            }
+            
+            $('#correctButton').click(function () {
+                updateCorrect(1);
+            });
+
+            $('#uncorrectButton').click(function () {
+                updateCorrect(-1);
+            });
         });
     </script>
 </body>

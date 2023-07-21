@@ -7,6 +7,7 @@ import shutil
 import sql_tunner
 import store
 import atexit
+import sqlparse
 
 app = Flask(__name__)
 tunner = sql_tunner.SqlTunner()
@@ -28,13 +29,15 @@ def tune():
 
     try:
         result = tunner.tune(gpt_version, original_sql, new_schemas, new_stats_info)
-
-        db.insert_record(original_sql, schemas, stats_info, result['tuned_sql'], result['what_changed'], result['index_suggestion'], gpt_version)
+        tuned_sql = result['tuned_sql']
+        tuned_sql = sqlparse.format(tuned_sql, reindent=True, keyword_case='upper')
+        id = db.insert_record(original_sql, schemas, stats_info, tuned_sql, result['what_changed'], result['index_suggestion'], gpt_version)
 
         return jsonify({
-            'tuned_sql': result['tuned_sql'],
+            'tuned_sql': tuned_sql,
             'what_changed': result['what_changed'],
             'index_suggestion': result['index_suggestion'],
+            'id': id,
         })
     except Exception as e:
         return jsonify({
@@ -100,6 +103,18 @@ def history(id):
         abort(404)
 
     return render_template('history.html', record=record)
+
+@app.route('/correct', methods=['POST'])
+def correct():
+    id = request.form['id']
+    correct = request.form['correct']
+
+    db.update_correct_field(id, correct)
+
+    return jsonify({
+        'id': id,
+        'correct': correct,
+    })
 
 
 def process_zip(zip_file_path):

@@ -38,17 +38,21 @@ class Store:
         schemas = schemas[:10000] if len(schemas) > 10000 else schemas
         
         try:
-            with self.connection.cursor() as cursor:
-                sql = "INSERT INTO history (original_sql, schemas_info, stats_info, tuned_sql, what_changed, index_suggestion,gpt_version) " \
+            cursor = self.connection.cursor()
+            sql = "INSERT INTO history (original_sql, schemas_info, stats_info, tuned_sql, what_changed, index_suggestion,gpt_version) " \
                     "VALUES (%s, %s, %s, %s, %s, %s,%s)"
-                cursor.execute(sql, (original_sql, schemas, stats_info, tuned_sql, what_changed, index_suggestion,gpt_version))
+            cursor.execute(sql, (original_sql, schemas, stats_info, tuned_sql, what_changed, index_suggestion,gpt_version))
             self.connection.commit()
+            id = cursor.lastrowid
+            cursor.close()
+            return id
+
         except pymysql.Error as e:
             print(f"Error inserting record: {e}")
 
     # Function to update the 'correct' field by id
     def update_correct_field(self, id, correct_value):
-        try:
+         try:
             with self.connection.cursor() as cursor:
                 sql = "UPDATE history SET correct = %s WHERE id = %s"
                 cursor.execute(sql, (correct_value, id))
