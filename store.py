@@ -2,13 +2,23 @@ import pymysql
 import time
 import os
 from dotenv import load_dotenv, find_dotenv
+import platform
+import sys
 
 host = 'gateway01.us-east-1.prod.aws.tidbcloud.com'
 port = 4000  # TiDB default port is 4000
 user = '48tps7f6KZGo1Gq.root'
 database = 'sqltuner'
 ssl_mode="VERIFY_IDENTITY"
-ssl={"ca": "/etc/ssl/cert.pem"}
+
+os_name = platform.system()
+if os_name == "Darwin":  # macOS
+    ssl={"ca": "/etc/ssl/cert.pem"}
+elif os_name == "Linux":
+    ssl={"ca": "/etc/pki/tls/certs/ca-bundle.crt"}
+else:
+    print(f"Doesn't support {os_name}")
+    sys.exit(1)  # Exit the application with an error code
 
 def get_password():
     _ = load_dotenv(find_dotenv())
@@ -52,7 +62,7 @@ class Store:
 
     # Function to update the 'correct' field by id
     def update_correct_field(self, id, correct_value):
-         try:
+        try:
             with self.connection.cursor() as cursor:
                 sql = "UPDATE history SET correct = %s WHERE id = %s"
                 cursor.execute(sql, (correct_value, id))

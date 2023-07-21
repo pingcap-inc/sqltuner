@@ -46,6 +46,7 @@ class SqlTunner:
         try:
             chat = ChatOpenAI(temperature=0, model=gpt_version)
             output = chat(input.to_messages())
+            print(output.content)
             return self.output_parser.parse(output.content)
         except Exception as e:
             print(e)    
