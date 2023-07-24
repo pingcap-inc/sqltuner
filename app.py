@@ -20,12 +20,10 @@ def tune():
     original_sql = request.form['original_sql']
     schemas = request.form['schemas']
     execution_plan = request.form['execution_plan']
-    new_schemas = None if len(schemas) > 4000 else schemas
-    new_execution_plan = None if len(execution_plan) > 4000 else execution_plan
     gpt_version = request.form['gpt_version']
 
     try:
-        result = tunner.tune(gpt_version, original_sql, new_schemas, new_execution_plan)
+        result = tunner.tune(gpt_version, original_sql, schemas, execution_plan)
         tuned_sql = result['tuned_sql']
         tuned_sql = sqlparse.format(tuned_sql, reindent=True, keyword_case='upper')
         db = store.Store()

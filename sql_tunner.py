@@ -23,9 +23,9 @@ class SqlTunner:
         ]
         self.output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
 
-    def get_prompt(self, schemas, original_sql, original_plan, format_instructions):
+    def get_prompt(self, original_sql, schemas, original_plan, format_instructions):
         return f"""
-            Your task is optimizing a given SQL query to achieve better performance on TiDB while ensuring it retains the same semantics as before . You will have access to the SQL query, the related table schema, and the execution plan, all enclosed in triple backquotes (`). Your goal is to follow the step-by-step guide below to improve the SQL query's execution speed.
+            Your task is optimizing a given SQL query to achieve better performance on TiDB while ensuring it retains the same semantics. You will receive the SQL query with the related table schema and execution plan, all enclosed in triple backquotes (`). Your goal is to follow the step-by-step instructions below to improve the SQL query's execution speed.
 
             Step 1: Familiarize Yourself with TiDB Tuning
             To start, read the documentation of TiDB to understand how to optimize SQL performance on this platform effectively.
@@ -67,8 +67,6 @@ class SqlTunner:
             print("output")
             print(output.content)
             output = output.content.replace('\n', ' ')
-            print("replace output")
-            print(output)
             return self.output_parser.parse(output)
         except Exception as e:
             print(e)    
@@ -298,7 +296,7 @@ if __name__ == "__main__":
         13 rows in set (1 min 46.438 sec)
     """
     tunner = SqlTunner()
-    output = tunner.tune("gpt-3.5-turbo-16k", schemas, original_sql, original_plan)
+    output = tunner.tune("gpt-3.5-turbo-16k", original_sql, schemas, original_plan)
     # output = tunner.tune("gpt-4", schemas, original_sql, original_plan)
     print(output)
 

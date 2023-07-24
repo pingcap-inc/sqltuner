@@ -44,8 +44,6 @@ class Store:
 
     # Function to insert a new record into the table
     def insert_record(self,original_sql, schemas, execution_plan, tuned_sql, what_changed, index_suggestion,gpt_version):
-        execution_plan = execution_plan[:10000] if len(execution_plan) > 10000 else execution_plan
-        schemas = schemas[:10000] if len(schemas) > 10000 else schemas
         
         try:
             cursor = self.connection.cursor()
