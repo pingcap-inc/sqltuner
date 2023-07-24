@@ -40,7 +40,7 @@ class SqlTunner:
             Analyze the execution plan of the SQL query to identify potential bottlenecks and areas for improvement.
 
             Step 5: Generate the Tuned SQL Query
-            Based on the insights gained from the previous steps, rewrite and optimize the SQL query to enhance its performance on TiDB. 
+            Based on the insights gained from the previous steps, rewrite and optimize the SQL query to enhance its performance on TiDB. You may use hints to guide the optimizer to generate a better execution plan, but using temporary tables is not allowed.
 
             Step 6: Explain Changes and Reasoning
             Document the changes made to the SQL query and provide a clear explanation of why each change was made. Justify how these alterations contribute to improved performance.
@@ -67,6 +67,8 @@ class SqlTunner:
             print("output")
             print(output.content)
             output = output.content.replace('\n', ' ')
+            index = output.index('```json')
+            output = output[index:]
             return self.output_parser.parse(output)
         except Exception as e:
             print(e)    
