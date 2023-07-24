@@ -72,7 +72,7 @@ class SqlTunner:
             return self.output_parser.parse(output)
         except Exception as e:
             print(e)    
-            raise
+            return {"tuned_sql": "", "what_changed": output, "index_suggestion": ""}
 
     def get_chat(self, gpt_version):
         return ChatOpenAI(temperature=0, model=gpt_version)
