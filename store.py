@@ -3,12 +3,9 @@ import time
 import os
 from dotenv import load_dotenv, find_dotenv
 import platform
+from pathlib import Path
 import sys
 
-host = 'gateway01.us-east-1.prod.aws.tidbcloud.com'
-port = 4000  # TiDB default port is 4000
-user = '48tps7f6KZGo1Gq.root'
-database = 'sqltuner'
 ssl_mode="VERIFY_IDENTITY"
 
 os_name = platform.system()
@@ -20,19 +17,19 @@ else:
     print(f"Doesn't support {os_name}")
     sys.exit(1)  # Exit the application with an error code
 
-def get_password():
+def get_db_config():
     _ = load_dotenv(find_dotenv())
-    return os.getenv("TIDB_PASSWORD")
+    return os.getenv("TIDB_HOST"), os.getenv("TIDB_PORT"), os.getenv("TIDB_USER"), os.getenv("TIDB_PASSWORD"), os.getenv("TIDB_DATABASE")
 
 class Store: 
     def __init__(self):
         retry_count = 5  # Number of retries
         retry_delay = 2  # Delay between retries (in seconds)
-        password = get_password()
+        host, port, user, password, database = get_db_config()
 
         for _ in range(retry_count):
             try:
-                self.connection = pymysql.connect(host=host, port=port, user=user, password=password, database=database, ssl=ssl)
+                self.connection = pymysql.connect(host=host, port=int(port), user=user, password=password, database=database, ssl=ssl)
                 print("Connected to TiDB successfully!")
                 return
             except pymysql.Error as e:

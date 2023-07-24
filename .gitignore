@@ -161,3 +161,4 @@ cython_debug/
 uploads/
 .python-version
 .vscode/
+.env_server
