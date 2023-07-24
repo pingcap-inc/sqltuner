@@ -190,7 +190,7 @@
                     contentType: false,
                     success: function (data) {
                         if (data.error) {
-                            alert(data.error);
+                            showError(data.error);
                             return;
                         }
                         $('#tunedSQLOutput').val(data.tuned_sql);
