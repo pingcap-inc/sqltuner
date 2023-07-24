@@ -19,17 +19,17 @@ def index():
 def tune():
     original_sql = request.form['original_sql']
     schemas = request.form['schemas']
-    stats_info = request.form['stats_info']
+    execution_plan = request.form['execution_plan']
     new_schemas = None if len(schemas) > 4000 else schemas
-    new_stats_info = None if len(stats_info) > 4000 else stats_info
+    new_execution_plan = None if len(execution_plan) > 4000 else execution_plan
     gpt_version = request.form['gpt_version']
 
     try:
-        result = tunner.tune(gpt_version, original_sql, new_schemas, new_stats_info)
+        result = tunner.tune(gpt_version, original_sql, new_schemas, new_execution_plan)
         tuned_sql = result['tuned_sql']
         tuned_sql = sqlparse.format(tuned_sql, reindent=True, keyword_case='upper')
         db = store.Store()
-        id = db.insert_record(original_sql, schemas, stats_info, tuned_sql, result['what_changed'], result['index_suggestion'], gpt_version)
+        id = db.insert_record(original_sql, schemas, execution_plan, tuned_sql, result['what_changed'], result['index_suggestion'], gpt_version)
         db.close()
 
         return jsonify({
@@ -59,11 +59,11 @@ def parse():
     file.save(os.path.join('uploads', unique_filename))
     result = process_zip(os.path.join('uploads', unique_filename))
 
-    orginal_sql, schemas, stats_info = result
+    orginal_sql, schemas, execution_plan = result
     return jsonify({
         'original_sql': orginal_sql,
         'schemas': schemas,
-        'stats_info': stats_info,
+        'execution_plan': execution_plan,
     })
 
 @app.route('/history/first', methods=['GET'])
@@ -139,12 +139,12 @@ def process_zip(zip_file_path):
         with open(os.path.join(extracted_folder, 'sql','sql0.sql')) as file:
             original_sql = file.read()
     schemas = read_files_in_folder(os.path.join(extracted_folder, 'schema'))
-    statics_info = read_files_in_folder(os.path.join(extracted_folder, 'stats'))
+    execution_plan = read_files_in_folder(os.path.join(extracted_folder, 'explain'))
 
     os.remove(zip_file_path)
     shutil.rmtree(extracted_folder)
 
-    return original_sql, schemas, statics_info
+    return original_sql, schemas, execution_plan
 
 def read_files_in_folder(folder_path):
     combined_content = ""

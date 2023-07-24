@@ -27,6 +27,10 @@
             padding-left: 30px;
             padding-right: 30px;
         }
+
+        #executionPlanInput{
+            overflow: auto;
+        }
     </style>
 </head>
 
@@ -86,8 +90,8 @@
                         <textarea class="form-control" id="schemasInput" name="schemas" rows="6"></textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="statisticsInfoInput" class="form-label">Statistics Info</label>
-                        <textarea class="form-control" id="statisticsInfoInput" name="stats_info" rows="6"></textarea>
+                        <label for="executionPlanInput" class="form-label">Execution Plan</label>
+                        <textarea class="form-control" id="executionPlanInput" name="execution_plan" rows="6"></textarea>
                     </div>
 
                     <!-- Center the "Tune" button -->
@@ -144,7 +148,7 @@
 
             // Handle file selection event
             $('#planReplayerInput').change(function () {
-                $('#originalSQLInput, #schemasInput, #statisticsInfoInput').val('');
+                $('#originalSQLInput, #schemasInput, #executionPlanInput').val('');
                 $('#tunedSQLOutput, #whatChangedOutput, #moreIndexSuggestionsOutput').val('');
 
                 var form = $('#uploadForm')[0];
@@ -160,7 +164,7 @@
                         // Update the input fields with the parsed data
                         $('#originalSQLInput').val(data.original_sql);
                         $('#schemasInput').val(data.schemas);
-                        $('#statisticsInfoInput').val(data.stats_info);
+                        $('#executionPlanInput').val(data.execution_plan);
                     },
                     error: function () {
                         show('An error occurred during parsing.');
@@ -227,8 +231,8 @@
                 }
             }
 
-            // Bind event listeners to "Schemas" and "Statistics Info" inputs for both "input" and "change" events
-            $('#schemasInput, #statisticsInfoInput').on('input change', function () {
+            // Bind event listeners to "Schemas" and "Execution Plan" inputs for both "input" and "change" events
+            $('#schemasInput, #executionPlanInput').on('input change', function () {
                 updateLabelTitle($(this));
             });
 
