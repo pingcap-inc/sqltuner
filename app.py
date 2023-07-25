@@ -64,40 +64,29 @@ def parse():
         'execution_plan': execution_plan,
     })
 
-@app.route('/history/first', methods=['GET'])
-def first():
+@app.route('/histories', methods=['GET'])
+def histories():
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+
     db = store.Store()
-    id = db.get_first()
+    histories, count = db.get_histories_with_page(page, per_page)
     db.close()
-    print("first" ,id)
+    total_pages = (count - 1) // per_page + 1
 
-    return redirect(url_for('history', id=id))
+    start_idx = (page - 1) * per_page
+    end_idx = start_idx + per_page
 
-@app.route('/history/next/<int:id>', methods=['GET'])
-def next(id):
+    return render_template('histories.html', histories=histories, page=page, total_pages=total_pages, total_items=count)
+
+@app.route('/histories/delete/<int:id>', methods=['POST'])
+def delete_history(id):
     db = store.Store()
-    id = db.get_next(id)
-    db.close()
-
-    if id:
-        return jsonify({
-            'id': id,
-        })
-    else:
-        abort(404)
-
-@app.route('/history/prev/<int:id>', methods=['GET'])
-def prev(id):
-    db = store.Store()
-    id = db.get_prev(id)
+    db.delete_history(id)
     db.close()
 
-    if id:
-        return jsonify({
-            'id': id,
-        })
-    else:
-        abort(404)
+    return {}, 200
+
 
 @app.route('/history/<int:id>', methods=['GET'])
 def history(id):

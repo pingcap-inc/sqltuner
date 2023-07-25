@@ -27,7 +27,7 @@
                         <a class="nav-link" href="/">Tune</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/history/first">History</a>
+                        <a class="nav-link" href="/histories">Histories</a>
                     </li>
                 </ul>
             </div>
@@ -39,12 +39,7 @@
             <h3>ID: {{record[0]}}</h3>
             <h4>Using: {{record[8]}} -- {{'Correct' if record[7] == 1 else 'UnCorrect' if record[7] == -1 else 'No Score'}}</h4>
             <div class="d-flex">
-                <button id="previousButton" type="button" class="btn btn-primary me-2">Previous</button>
-                <button id="nextButton" type="button" class="btn btn-primary me-2">Next</button>
-                <div class="input-group">
-                    <input id="recordNumberInput" type="number" class="form-control" placeholder="Go to" min="1">
-                    <button id="goButton" class="btn btn-primary" type="button">Go</button>
-                </div>
+                <a class="btn btn-primary btn-small" href="/histories">Back to List</a>
             </div>
         </div>
     </nav>
@@ -136,61 +131,6 @@
         function hideError() {
             $('#errorBox').fadeOut();
         }
-
-        // Update the URL with the new record number
-        function navigate(url, errorMessage) {
-            $.ajax({
-                url: url,
-                type: 'get',
-                success: function (response) {
-                    if (response) {
-                        window.location = `/history/${response.id}`;
-                    }
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    if (jqXHR.status === 404) {
-                        showError(errorMessage);
-                    } else {
-                        // Handle other error codes here
-                        showError('An error occurred');
-                    }
-                }
-            });
-        }
-
-        // Handle "Previous" button click
-        $('#previousButton').click(function () {
-            let currentRecord = getCurrentRecordNumber();
-            navigate(`/history/prev/${currentRecord}`, 'No more records');
-        });
-
-        // Handle "Next" button click
-        $('#nextButton').click(function () {
-            let currentRecord = getCurrentRecordNumber();
-            navigate(`/history/next/${currentRecord}`, 'No more records');
-        });
-
-        // Handle "Go" button click
-        $('#goButton').click(function () {
-            let inputValue = parseInt($('#recordNumberInput').val());
-            $.ajax({
-                url: `/history/${inputValue}`,
-                type: 'get',
-                success: function (response) {
-                    if (response) {
-                        window.location = `/history/${inputValue}`;
-                    }
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    if (jqXHR.status === 404) {
-                        showError('Record not found');
-                    } else {
-                        // Handle other error codes here
-                        showError('An error occurred');
-                    }
-                }
-            });
-        });
 
     </script>
 </body>

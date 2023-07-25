@@ -75,44 +75,28 @@ class Store:
         except pymysql.Error as e:
             print(f"Error retrieving record: {e}")
 
-    def get_count(self):
+    def get_histories_with_page(self, page, per_page):
         try:
             with self.connection.cursor() as cursor:
+                sql = "SELECT * FROM history ORDER BY id DESC LIMIT %s OFFSET %s"
+                cursor.execute(sql, (per_page, (page - 1) * per_page))
+                result = cursor.fetchall()
                 sql = "SELECT COUNT(*) FROM history"
                 cursor.execute(sql)
-                return cursor.fetchone()[0]
+                count = cursor.fetchone()[0]
+                return result, count
         except pymysql.Error as e:
-            print(f"Error getting table count: {e}")
+            print(f"Error getting histories with page: {e}")
 
-    def get_first(self):
+    def delete_history(self, id):
         try:
             with self.connection.cursor() as cursor:
-                sql = "SELECT min(id) FROM history"
-                cursor.execute(sql)
-                result = cursor.fetchone()
-                return result[0] if result else None
+                sql = "DELETE FROM history WHERE id = %s"
+                cursor.execute(sql, (id,))
+            self.connection.commit()
         except pymysql.Error as e:
-            print(f"Error getting first id: {e}")
+            print(f"Error deleting history: {e}")
 
-    def get_next(self, id):
-        try:
-            with self.connection.cursor() as cursor:
-                sql = "SELECT id FROM history WHERE id > %s order by id limit 1"
-                cursor.execute(sql, id)
-                result = cursor.fetchone()
-                return result[0] if result else None
-        except pymysql.Error as e:
-            print(f"Error getting next id: {e}")
-
-    def get_prev(self, id):
-        try:
-            with self.connection.cursor() as cursor:
-                sql = "SELECT id FROM history WHERE id < %s order by id desc limit 1"
-                cursor.execute(sql, id)
-                result = cursor.fetchone()
-                return result[0] if result else None
-        except pymysql.Error as e:
-            print(f"Error getting previous id: {e}")
     
     def close(self):
         print("Closing connection to TiDB...")
