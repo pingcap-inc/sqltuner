@@ -78,7 +78,7 @@ class Store:
     def get_histories_with_page(self, page, per_page):
         try:
             with self.connection.cursor() as cursor:
-                sql = "SELECT * FROM history ORDER BY id DESC LIMIT %s OFFSET %s"
+                sql = "SELECT id, original_sql FROM history ORDER BY id DESC LIMIT %s OFFSET %s"
                 cursor.execute(sql, (per_page, (page - 1) * per_page))
                 result = cursor.fetchall()
                 sql = "SELECT COUNT(*) FROM history"
