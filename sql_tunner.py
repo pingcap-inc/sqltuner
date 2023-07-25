@@ -25,7 +25,9 @@ class SqlTunner:
 
     def get_prompt(self, original_sql, schemas, original_plan, format_instructions):
         return f"""
-            Your task is optimizing a given SQL query to achieve better performance on TiDB while ensuring it retains the same semantics. You will receive the SQL query with the related table schema and execution plan, all enclosed in triple backquotes (`). Your goal is to follow the step-by-step instructions below to improve the SQL query's execution speed.
+            Your task is optimizing a given SQL query to achieve better performance on TiDB while ensuring it retains the same semantics. You will receive the SQL query with the related table schema and execution plan, all enclosed in triple backquotes (`).
+            If table schemas or execution plans are not provided, you may assume that they are not available, and you should try your best to optimize the SQL query without them.
+            Your goal is to follow the step-by-step instructions below to improve the SQL query's execution speed.
 
             Step 1: Familiarize Yourself with TiDB Tuning
             To start, read the documentation of TiDB to understand how to optimize SQL performance on this platform effectively.
