@@ -29,16 +29,23 @@
         </div>
     </nav>
 
-    <div class="container mt-3">
-        <div class="alert alert-success alert-dismissible fade" id="successAlert" role="alert">
-            <strong>Success:</strong> <span id="successMessage"></span>
-            <button type="button" class="btn-close" onclick="hideAlert('successAlert')" aria-label="Close"></button>
-        </div>
-
-        <div class="alert alert-danger alert-dismissible fade" id="errorAlert" role="alert">
+    <!-- Error Message Box -->
+    <div class="container mt-3" id="errorBox" style="display: none;">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <strong>Error:</strong> <span id="errorMessage"></span>
-            <button type="button" class="btn-close" onclick="hideAlert('errorAlert')" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+    </div>
+
+    <!--  Message Box -->
+    <div class="container mt-3" id="successBox" style="display: none;">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Success:</strong> <span id="successMessage"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <div class="container mt-3">
         <!-- History List Table -->
         <table class="table table-bordered table-striped">
             <thead class="thead-light">
@@ -99,14 +106,14 @@
             $(`#${alertId}`).removeClass('show');
         }
 
-        function showSuccessMessage(message) {
-            $('#successMessage').text(message);
-            $('#successAlert').addClass('show');
+        function showError(message) {
+            $('#errorMessage').text(message);
+            $('#errorBox').fadeIn();
         }
 
-        function showErrorMessage(message) {
-            $('#errorMessage').text(message);
-            $('#errorAlert').addClass('show');
+        function showSuccess(message) {
+            $('#successMessage').text(message);
+            $('#successBox').fadeIn();
         }
 
         function deleteHistory(historyId) {
@@ -116,7 +123,7 @@
                     url: `/histories/delete/${historyId}`,
                     success: function (response) {
                         // Display success message and remove row from table
-                        showSuccessMessage(response.message);
+                        showSuccess("the record are deleted successfully");
                         location.reload();
                     },
                     error: function (error) {
