@@ -39,7 +39,7 @@
             <h3>ID: {{record[0]}}</h3>
             <h4>Using: {{record[8]}} -- {{'Correct' if record[7] == 1 else 'UnCorrect' if record[7] == -1 else 'No Score'}}</h4>
             <div class="d-flex">
-                <a class="btn btn-primary btn-small" href="/histories">Back to List</a>
+                <button class="btn btn-primary" onclick="goBack()">Back to List</a>
             </div>
         </div>
     </nav>
@@ -130,6 +130,19 @@
         // Function to hide the error message
         function hideError() {
             $('#errorBox').fadeOut();
+        }
+
+        function goBack(){
+            if (window.history && window.history.length && window.history.state && window.history.state.path) {
+                const path = window.history.state.path;
+                if (path.includes('/histories')) {
+                    window.history.back();
+                } else {
+                    window.location.href = '/histories';
+                }
+            } else {
+                window.location.href = '/histories';
+            }
         }
 
     </script>
