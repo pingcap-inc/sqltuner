@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
     <!-- CodeMirror CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css">
-     <!-- SQL Formatter JS -->
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql-formatter/2.3.3/sql-formatter.min.js"></script>
+    <!-- SQL Formatter JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql-formatter/2.3.3/sql-formatter.min.js"></script>
 </head>
 </head>
 
@@ -37,7 +37,8 @@
     <nav class="navbar navbar-light bg-light">
         <div class="container-fluid">
             <h3>ID: {{record[0]}}</h3>
-            <h4>Using: {{record[8]}} -- {{'Correct' if record[7] == 1 else 'UnCorrect' if record[7] == -1 else 'No Score'}}</h4>
+            <h4>Using: {{record[8]}} -- {{'Correct' if record[7] == 1 else 'UnCorrect' if record[7] == -1 else 'No
+                Score'}}</h4>
             <div class="d-flex">
                 <button class="btn btn-primary" onclick="goBack()">Back to List</a>
             </div>
@@ -123,26 +124,17 @@
         }
 
         function showError(message) {
-                $('#errorMessage').text(message);
-                $('#errorBox').fadeIn();
-            }
+            $('#errorMessage').text(message);
+            $('#errorBox').fadeIn();
+        }
 
         // Function to hide the error message
         function hideError() {
             $('#errorBox').fadeOut();
         }
 
-        function goBack(){
-            if (window.history && window.history.length && window.history.state && window.history.state.path) {
-                const path = window.history.state.path;
-                if (path.includes('/histories')) {
-                    window.history.back();
-                } else {
-                    window.location.href = '/histories';
-                }
-            } else {
-                window.location.href = '/histories';
-            }
+        function goBack() {
+            window.history.back();
         }
 
     </script>
