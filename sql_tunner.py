@@ -74,7 +74,7 @@ class SqlTunner:
             return {"tuned_sql": "", "what_changed": "something error happended, Please look at the history", "index_suggestion": ""}, prompt, output
 
     def get_chat(self, gpt_version):
-        return ChatOpenAI(temperature=0.0, model=gpt_version)
+        return ChatOpenAI(temperature=0.0, model=gpt_version, verbose=True)
     
 
 if __name__ == "__main__":
