@@ -40,13 +40,13 @@ class Store:
 
 
     # Function to insert a new record into the table
-    def insert_record(self,original_sql, schemas, execution_plan, tuned_sql, what_changed, index_suggestion,gpt_version):
+    def insert_record(self,original_sql, schemas, execution_plan, tuned_sql, what_changed, index_suggestion,gpt_version, input, output):
         
         try:
             cursor = self.connection.cursor()
-            sql = "INSERT INTO history (original_sql, schemas_info, execution_plan, tuned_sql, what_changed, index_suggestion,gpt_version) " \
-                    "VALUES (%s, %s, %s, %s, %s, %s,%s)"
-            cursor.execute(sql, (original_sql, schemas, execution_plan, tuned_sql, what_changed, index_suggestion,gpt_version))
+            sql = "INSERT INTO history (original_sql, schemas_info, execution_plan, tuned_sql, what_changed, index_suggestion,gpt_version, input, output) " \
+                    "VALUES (%s, %s, %s, %s, %s, %s,%s, %s, %s)"
+            cursor.execute(sql, (original_sql, schemas, execution_plan, tuned_sql, what_changed, index_suggestion,gpt_version, input, output))
             self.connection.commit()
             id = cursor.lastrowid
             cursor.close()

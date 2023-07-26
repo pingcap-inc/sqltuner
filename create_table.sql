@@ -11,3 +11,6 @@ create table history (
     created_at timestamp not null default current_timestamp,
     primary key (id)
     );
+
+alter table history add column output text;
+alter table history add column input text;

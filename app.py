@@ -23,11 +23,11 @@ def tune():
     gpt_version = request.form['gpt_version']
 
     try:
-        result = tunner.tune(gpt_version, original_sql, schemas, execution_plan)
+        result, input, output = tunner.tune(gpt_version, original_sql, schemas, execution_plan)
         tuned_sql = result['tuned_sql']
         tuned_sql = sqlparse.format(tuned_sql, reindent=True, keyword_case='upper')
         db = store.Store()
-        id = db.insert_record(original_sql, schemas, execution_plan, tuned_sql, result['what_changed'], result['index_suggestion'], gpt_version)
+        id = db.insert_record(original_sql, schemas, execution_plan, tuned_sql, result['what_changed'], result['index_suggestion'], gpt_version, input, output)
         db.close()
 
         return jsonify({

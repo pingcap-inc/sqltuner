@@ -61,20 +61,17 @@ class SqlTunner:
 
     def tune(self, gpt_version, original_sql, schemas, original_plan):
         prompt = self.get_prompt(original_sql, schemas, original_plan,self.output_parser.get_format_instructions())
+        output = None
         try:
             chat = self.get_chat(gpt_version)
             output = chat([HumanMessage(content=prompt)])
-            print("input")
-            print(prompt)
-            print("output")
-            print(output.content)
             output = output.content.replace('\n', ' ')
             index = output.index('```json')
             output = output[index:]
-            return self.output_parser.parse(output)
+            return self.output_parser.parse(output), prompt, output
         except Exception as e:
             print(e)    
-            return {"tuned_sql": "", "what_changed": output, "index_suggestion": ""}
+            return {"tuned_sql": "", "what_changed": "something error happended, Please look at the history", "index_suggestion": ""}, prompt, output
 
     def get_chat(self, gpt_version):
         return ChatOpenAI(temperature=0.0, model=gpt_version)
