@@ -106,7 +106,7 @@ if __name__ == "__main__":
     store = Store()
     
     # Example usage:
-    store.insert_record("orginal_history", "schema_info", "execution_plan", "tuned_sql", "changes", "index_suggestion", "gpt_version")
+    store.insert_record("orginal_history", "schema_info", "execution_plan", "tuned_sql", "changes", "index_suggestion", "gpt_version", "input", "output")
     store.update_correct_field(1, 1)
 
     record = store.get_record_by_id(1)
