@@ -1,15 +1,15 @@
 # SQLTuner
 
-It is a simple tool designed to tune sql statement to run fast on TiDB. It uses chatgpt to do the real work.
+SQLTuner is a simple tool designed to tune SQL statements to run faster on TiDB. It utilizes ChatGPT to perform the actual work.
 
 ## Development
-* The app uses some python libraries need Python version >= 3.10
-* There is a .env_template file. Rename it to .env and change its content like the ChatGPT API Key and the TiDB server configuration.
-* Run this command after that
+* The app requires some Python libraries, so make sure you have Python version >= 3.10 installed.
+* There is a .env_template file. Please rename it to .env and update its content with the ChatGPT API Key and the TiDB server configuration.
+* After making the necessary changes to the .env file, run the following commands to run the server. The server will listen on port 5001:
 ```code
 pip install -r requirements.txt
 python3 app.py
 ```
 
 # Notes
-Now the appliction is running using Flask, it's not ready for production use. You may use Gunicorn or uWSGI instead.
+Currently, the application is running using Flask, and it's not yet ready for production use. For production, consider using Gunicorn or uWSGI instead.
