@@ -13,7 +13,7 @@ tunner = sql_tunner.SqlTunner()
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html')
+    return render_template('index.html', prompt=tunner.get_prompt())
 
 @app.route('/tune', methods=['POST'])
 def tune():
@@ -21,9 +21,12 @@ def tune():
     schemas = request.form['schemas']
     execution_plan = request.form['execution_plan']
     gpt_version = request.form['gpt_version']
+    prompt = request.form['prompt']
+    if not prompt:
+        prompt = tunner.get_prompt()
 
     try:
-        result, input, output = tunner.tune(gpt_version, original_sql, schemas, execution_plan)
+        result, input, output = tunner.tune(gpt_version, prompt, original_sql, schemas, execution_plan)
         tuned_sql = result['tuned_sql']
         tuned_sql = sqlparse.format(tuned_sql, reindent=True, keyword_case='upper')
         db = store.Store()

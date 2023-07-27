@@ -7,6 +7,7 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain.schema import HumanMessage
 
+
 class SqlTunner:
     def __init__(self):
         self.init_dotenv()
@@ -17,14 +18,18 @@ class SqlTunner:
 
     def init_output_parser(self):
         response_schemas = [
-            ResponseSchema(name="tuned_sql", description="Optimized SQL query"),
-            ResponseSchema(name="what_changed", description="Explanation of Changes and Reasoning"),
-            ResponseSchema(name="index_suggestion", description="Additional Index Suggestions"),
+            ResponseSchema(name="tuned_sql",
+                           description="Optimized SQL query"),
+            ResponseSchema(name="what_changed",
+                           description="Explanation of Changes and Reasoning"),
+            ResponseSchema(name="index_suggestion",
+                           description="Additional Index Suggestions"),
         ]
-        self.output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
+        self.output_parser = StructuredOutputParser.from_response_schemas(
+            response_schemas)
 
-    def get_prompt(self, original_sql, schemas, original_plan, format_instructions):
-        return f"""
+    def get_prompt(self):
+        return """
             Your task is optimizing a given SQL query to achieve better performance on TiDB while ensuring it retains the same semantics. You will receive the SQL query with the related table schema and execution plan, all enclosed in triple backquotes (`).
             If table schemas or execution plans are not provided, you may assume that they are not available, and you should try your best to optimize the SQL query without them.
             Your goal is to follow the step-by-step instructions below to improve the SQL query's execution speed.
@@ -54,13 +59,14 @@ class SqlTunner:
             {format_instructions}
 
             Table Schemas: ```{schemas}```
-            SQL Query: ```{original_sql}```
-            Execution Plan: ```{original_plan}```
+            SQL Query: ```{sql}```
+            Execution Plan: ```{execution_plan}```
 
         """
 
-    def tune(self, gpt_version, original_sql, schemas, original_plan):
-        prompt = self.get_prompt(original_sql, schemas, original_plan,self.output_parser.get_format_instructions())
+    def tune(self, gpt_version, prompt, original_sql, schemas, original_plan):
+        prompt = prompt.format(sql=original_sql, schemas=schemas, execution_plan=original_plan,
+                               format_instructions=self.output_parser.get_format_instructions())
         output = None
         try:
             chat = self.get_chat(gpt_version)
@@ -70,12 +76,12 @@ class SqlTunner:
             output = output[index:]
             return self.output_parser.parse(output), prompt, output
         except Exception as e:
-            print(e)    
+            print(e)
             return {"tuned_sql": "", "what_changed": "something error happended, Please look at the history", "index_suggestion": ""}, prompt, output
 
     def get_chat(self, gpt_version):
         return ChatOpenAI(temperature=0.0, model=gpt_version, verbose=True)
-    
+
 
 if __name__ == "__main__":
     original_sql = """
@@ -297,8 +303,7 @@ if __name__ == "__main__":
         13 rows in set (1 min 46.438 sec)
     """
     tunner = SqlTunner()
-    output = tunner.tune("gpt-3.5-turbo-16k", original_sql, schemas, original_plan)
+    output = tunner.tune("gpt-3.5-turbo-16k", original_sql,
+                         schemas, original_plan)
     # output = tunner.tune("gpt-4", schemas, original_sql, original_plan)
     print(output)
-
-

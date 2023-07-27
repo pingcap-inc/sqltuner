@@ -28,7 +28,7 @@
             padding-right: 30px;
         }
 
-        #executionPlanInput{
+        #executionPlanInput {
             overflow: auto;
         }
     </style>
@@ -91,12 +91,14 @@
                     </div>
                     <div class="mb-3">
                         <label for="executionPlanInput" class="form-label">Execution Plan</label>
-                        <textarea class="form-control" id="executionPlanInput" name="execution_plan" rows="6"></textarea>
+                        <textarea class="form-control" id="executionPlanInput" name="execution_plan"
+                            rows="6"></textarea>
                     </div>
 
-                    <!-- Center the "Tune" button -->
                     <div class="d-flex justify-content-center">
                         <button type="button" class="btn btn-primary me-2" id="tuneButton">Tune</button>
+                        <button class="btn btn-primary mx-3" id="customTuneButton" data-bs-toggle="modal"
+                            data-bs-target="#customTuneModal">Custom Tune</button>
                         <button type="button" class="btn btn-secondary" id="clearButton">Clear</button>
                     </div>
                 </form>
@@ -120,7 +122,7 @@
                     <button type="button" class="btn btn-success me-2" disabled id="correctButton">Correct</button>
                     <button type="button" class="btn btn-danger" id="uncorrectButton" disabled>UnCorrect</button>
                 </div>
-              
+
             </div>
         </div>
     </div>
@@ -129,6 +131,29 @@
         aria-label="GPT Version">
         <button type="button" class="btn btn-primary active" id="gpt35">gpt-3.5-turbo-16k</button>
         <button type="button" class="btn btn-secondary" id="gpt40">gpt-4</button>
+    </div>
+
+    <!-- Custom Tune Modal -->
+    <!-- Custom Tune Modal -->
+    <div class="modal fade" id="customTuneModal" tabindex="-1" aria-labelledby="customTuneModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customTuneModalLabel">Custom Tune</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">The custom prompt template should have {sql}, {schemas}, {execution_plan}, and
+                        {format_instructions} in it, or else the application can't work.</p>
+                    <textarea class="form-control" id="customTuneTextarea" rows="20">{{prompt}}</textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="customTuneTuneButton">Tune</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- jQuery and Bootstrap JS links -->
@@ -167,7 +192,7 @@
                         $('#executionPlanInput').val(data.execution_plan);
                     },
                     error: function () {
-                        show('An error occurred during parsing.');
+                        showError('An error occurred during parsing.');
                     }
                 });
             });
@@ -175,11 +200,13 @@
             // Handle form submission on button click
             $('#tuneButton').click(function () {
                 $(this).prop('disabled', true).text('Tuning...');
+                $('#customTuneButton').prop('disabled', true);
                 $('#tunedSQLOutput, #whatChangedOutput, #moreIndexSuggestionsOutput').val('');
 
                 var form = $('#uploadForm')[0];
                 var formData = new FormData(form);
                 formData.append('gpt_version', gptVersion);
+                formData.append('prompt', '');
                 formData.delete('file');
 
                 $.ajax({
@@ -208,6 +235,7 @@
                     complete: function () {
                         // Re-enable the "Tune" button and revert its text to "Tune"
                         $('#tuneButton').prop('disabled', false).text('Tune');
+                        $('#customTuneButton').prop('disabled', false);
                     }
                 });
             });
@@ -269,26 +297,26 @@
                         'id': id,
                         'correct': correct
                     },
-                    success: function(){
+                    success: function () {
                         $('#correctButton').prop('disabled', true);
                         $('#uncorrectButton').prop('disabled', true);
                         showSuccess('Tune status updated successfully.');
-                        if(correct > 0){
+                        if (correct > 0) {
 
                         }
                     },
-                    error: function(){
+                    error: function () {
                         showError('An error occurred during updating tune status.');
                     }
-                }, 
-                function (data) {
-                    if (data.error) {
-                        showError(data.error);
-                        return;
-                    }
-                });
+                },
+                    function (data) {
+                        if (data.error) {
+                            showError(data.error);
+                            return;
+                        }
+                    });
             }
-            
+
             $('#correctButton').click(function () {
                 updateCorrect(1);
             });
@@ -296,6 +324,54 @@
             $('#uncorrectButton').click(function () {
                 updateCorrect(-1);
             });
+
+            // Custom Tune Button Click Handler
+            $('#customTuneTuneButton').click(function () {
+                const customTuneContent = $('#customTuneTextarea').val();
+                $('#customTuneModal').modal('hide');
+                $('#customTuneButton').prop('disabled', true).text('Custom Tuning...');
+                $('#tuneButton').prop('disabled', true);
+                $('#tunedSQLOutput, #whatChangedOutput, #moreIndexSuggestionsOutput').val('');
+
+                var form = $('#uploadForm')[0];
+                var formData = new FormData(form);
+                formData.append('gpt_version', gptVersion);
+                formData.append('prompt', customTuneContent);
+                formData.delete('file');
+
+                $.ajax({
+                    url: '/tune',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        if (data.error) {
+                            showError(data.error);
+                            return;
+                        }
+                        $('#tunedSQLOutput').val(data.tuned_sql);
+                        $('#whatChangedOutput').val(data.what_changed);
+                        $('#moreIndexSuggestionsOutput').val(data.index_suggestion);
+                        id = data.id;
+
+                        $('#correctButton').prop('disabled', false);
+                        $('#uncorrectButton').prop('disabled', false);
+
+                    },
+                    error: function () {
+                        showError('An error occurred during processing.');
+                    },
+                    complete: function () {
+                        $('#customTuneButton').prop('disabled', false).text('Custom Tune');
+                        $('#tuneButton').prop('disabled', false);
+                    }
+                });
+            });
+        });
+
+        $('#customTuneButton').click(function (event) {
+            event.preventDefault();
         });
     </script>
 </body>
