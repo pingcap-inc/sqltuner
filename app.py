@@ -129,7 +129,12 @@ def process_zip(zip_file_path):
         with open(os.path.join(extracted_folder, 'sql','sql0.sql')) as file:
             original_sql = file.read()
     schemas = read_files_in_folder(os.path.join(extracted_folder, 'schema'))
-    execution_plan = read_files_in_folder(os.path.join(extracted_folder, 'explain'))
+
+    if os.path.exists(os.path.join(extracted_folder, 'explain.txt')):
+        with open(os.path.join(extracted_folder, 'explain.txt')) as file:
+            execution_plan = file.read()
+    else:
+        execution_plan = read_files_in_folder(os.path.join(extracted_folder, 'explain'))
 
     os.remove(zip_file_path)
     shutil.rmtree(extracted_folder)

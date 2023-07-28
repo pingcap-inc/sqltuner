@@ -71,7 +71,7 @@ class SqlTunner:
         try:
             chat = self.get_chat(gpt_version)
             output = chat([HumanMessage(content=prompt)])
-            output = output.content.replace('\n', ' ')
+            output = output.content.replace('\n', ' ').replace('\t', ' ')
             index = output.index('```json')
             output = output[index:]
             return self.output_parser.parse(output), prompt, output
