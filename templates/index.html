@@ -199,6 +199,11 @@
 
             // Handle form submission on button click
             $('#tuneButton').click(function () {
+                sql = $('#originalSQLInput').val().trim();
+                if (sql == '') {
+                    showError('Please fill in the SQL to be tuned.');
+                    return;
+                }
                 $(this).prop('disabled', true).text('Tuning...');
                 $('#customTuneButton').prop('disabled', true);
                 $('#tunedSQLOutput, #whatChangedOutput, #moreIndexSuggestionsOutput').val('');
@@ -208,6 +213,8 @@
                 formData.append('gpt_version', gptVersion);
                 formData.append('prompt', '');
                 formData.delete('file');
+
+
 
                 $.ajax({
                     url: '/tune',
@@ -327,6 +334,12 @@
 
             // Custom Tune Button Click Handler
             $('#customTuneTuneButton').click(function () {
+                sql = $('#originalSQLInput').val().trim();
+                if (sql == '') {
+                    showError('Please fill in the SQL to be tuned.');
+                    $('#customTuneModal').modal('hide');
+                    return;
+                }
                 const customTuneContent = $('#customTuneTextarea').val();
                 $('#customTuneModal').modal('hide');
                 $('#customTuneButton').prop('disabled', true).text('Custom Tuning...');
